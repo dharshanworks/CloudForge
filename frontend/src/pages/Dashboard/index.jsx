@@ -1,8 +1,16 @@
+import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
+import QuickActions from "../../components/dashboard/QuickActions";
+import StatsCards from "../../components/dashboard/StatsCards";
+
 function Dashboard() {
   return (
-    <div>
-      <h1>📊 Dashboard Page</h1>
-    </div>
+    <>
+      <WelcomeBanner />
+
+      <QuickActions />
+
+      <StatsCards />
+    </>
   );
 }
 
