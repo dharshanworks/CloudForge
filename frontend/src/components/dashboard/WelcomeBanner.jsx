@@ -1,4 +1,8 @@
+import { useAuth } from "../../context/AuthContext";
+
 function WelcomeBanner() {
+  const { user } = useAuth();
+
   return (
     <section
       style={{
@@ -15,17 +19,28 @@ function WelcomeBanner() {
           marginBottom: "10px",
         }}
       >
-        👋 Welcome Back
+        👋 Welcome Back{user?.fullName ? `, ${user.fullName}` : ""}
       </h1>
 
       <h2
         style={{
           color: "#2563eb",
-          marginBottom: "15px",
+          marginBottom: "10px",
         }}
       >
         CloudForge
       </h2>
+
+      <p
+        style={{
+          color: "#555",
+          marginBottom: "15px",
+        }}
+      >
+        {user
+          ? `${user.role} • ${user.email}`
+          : "Loading user information..."}
+      </p>
 
       <p
         style={{

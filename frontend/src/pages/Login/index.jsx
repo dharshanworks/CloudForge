@@ -1,13 +1,24 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { loginUser } from "../../api/auth.api";
+import { saveAccessToken } from "../../utils/auth";
+import { useAuth } from "../../context/AuthContext";
 
 function Login() {
+  const navigate = useNavigate();
+  const { refreshUser } = useAuth();
+
   // ============================
   // State Management
   // ============================
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   // ============================
   // Form Validation
@@ -40,18 +51,38 @@ function Login() {
   // Login Handler
   // ============================
 
-  function handleLogin(event) {
+  async function handleLogin(event) {
     event.preventDefault();
 
-    if (validateForm()) {
-      console.log("✅ Form is valid");
+    setLoginError("");
 
-      console.log({
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await loginUser({
         email,
         password,
       });
 
-      // Backend API integration will come here
+      // Save JWT
+      saveAccessToken(response.data.accessToken);
+
+      // Load current user into Auth Context
+      await refreshUser();
+
+      // Navigate to Dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      setLoginError(
+        error.response?.data?.message ||
+          "Unable to login. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -96,6 +127,23 @@ function Login() {
         >
           Welcome Back
         </h2>
+
+        {/* Backend Login Error */}
+
+        {loginError && (
+          <div
+            style={{
+              backgroundColor: "#fee2e2",
+              color: "#b91c1c",
+              padding: "12px",
+              borderRadius: "6px",
+              marginBottom: "20px",
+              fontSize: "14px",
+            }}
+          >
+            {loginError}
+          </div>
+        )}
 
         {/* Email */}
 
@@ -161,19 +209,21 @@ function Login() {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             width: "100%",
             padding: "14px",
-            cursor: "pointer",
-            backgroundColor: "#2563eb",
+            cursor: loading ? "not-allowed" : "pointer",
+            backgroundColor: loading ? "#93c5fd" : "#2563eb",
             color: "white",
             border: "none",
             borderRadius: "6px",
             fontSize: "16px",
             fontWeight: "bold",
+            opacity: loading ? 0.8 : 1,
           }}
         >
-          Login
+          {loading ? "Signing In..." : "Login"}
         </button>
       </form>
     </main>
